@@ -1,5 +1,5 @@
 from pydantic import BaseModel
-from typing import List, Optional
+from typing import Any, List, Optional
 from datetime import datetime
 from app.db.models import JobStatus
 
@@ -7,7 +7,7 @@ class ExtractionBase(BaseModel):
     question_text: str
     answer_text: str
     confidence: float
-    bounding_box: Optional[dict] = None
+    bounding_box: Optional[Any] = None
 
 class Extraction(ExtractionBase):
     id: int

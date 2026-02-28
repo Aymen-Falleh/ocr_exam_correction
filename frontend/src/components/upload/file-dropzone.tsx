@@ -4,7 +4,7 @@ import { useState, useCallback } from 'react';
 import { useDropzone } from 'react-dropzone';
 import {
     Upload,
-    File,
+    File as FileIcon,
     X,
     CheckCircle2,
     AlertCircle,
@@ -17,8 +17,11 @@ import { Progress } from '@/components/ui/progress';
 import { useTranslations } from 'next-intl';
 import api from '@/lib/axios';
 
-interface FileWithStatus extends File {
+interface FileWithStatus {
     id: string;
+    file: File;
+    name: string;
+    size: number;
     status: 'PENDING' | 'UPLOADING' | 'COMPLETED' | 'ERROR';
     progress: number;
 }
@@ -36,17 +39,14 @@ export function FileDropzone() {
     const [isUploading, setIsUploading] = useState(false);
 
     const onDrop = useCallback((acceptedFiles: File[]) => {
-        const newFiles = acceptedFiles.map(file => ({
-            ...file,
+        const newFiles: FileWithStatus[] = acceptedFiles.map(file => ({
             id: Math.random().toString(36).substring(7),
-            status: 'PENDING',
-            progress: 0,
+            file,
             name: file.name,
             size: file.size,
-            type: file.type,
-            lastModified: file.lastModified,
-            webkitRelativePath: file.webkitRelativePath
-        } as FileWithStatus));
+            status: 'PENDING',
+            progress: 0,
+        }));
 
         setFiles(prev => [...prev, ...newFiles]);
     }, []);
@@ -72,11 +72,10 @@ export function FileDropzone() {
 
             try {
                 const formData = new FormData();
-                formData.append('file', file as any);
+                formData.append('file', file.file);
                 formData.append('language', language);
 
                 await api.post('/jobs/upload', formData, {
-                    headers: { 'Content-Type': 'multipart/form-data' },
                     onUploadProgress: (progressEvent: any) => {
                         const progress = Math.round((progressEvent.loaded * 100) / (progressEvent.total || 1));
                         setFiles(prev => prev.map(f => f.id === file.id ? { ...f, progress } : f));
@@ -139,7 +138,7 @@ export function FileDropzone() {
                                 className="group p-3 border border-zinc-100 dark:border-zinc-800 rounded-xl hover:border-zinc-200 dark:hover:border-zinc-700 transition-colors flex items-center gap-4"
                             >
                                 <div className="w-10 h-10 bg-zinc-50 dark:bg-zinc-800 rounded-lg flex items-center justify-center">
-                                    <File className="h-5 w-5 text-zinc-400" />
+                                    <FileIcon className="h-5 w-5 text-zinc-400" />
                                 </div>
                                 <div className="flex-1 min-w-0">
                                     <div className="flex items-center justify-between mb-1">

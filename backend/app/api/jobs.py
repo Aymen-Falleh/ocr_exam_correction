@@ -2,6 +2,7 @@ from typing import Annotated, List, Optional
 from fastapi import APIRouter, Depends, HTTPException, UploadFile, File, Form, status
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy import select, desc
+from sqlalchemy.orm import selectinload
 import hashlib
 import os
 
@@ -21,7 +22,7 @@ async def read_jobs(
     limit: int = 100,
     status: Optional[JobStatus] = None
 ):
-    query = select(Job).offset(skip).limit(limit).order_by(desc(Job.created_at))
+    query = select(Job).options(selectinload(Job.extractions)).offset(skip).limit(limit).order_by(desc(Job.created_at))
     if status:
         query = query.where(Job.status == status)
     
@@ -41,7 +42,9 @@ async def upload_exam(
     file_hash = hashlib.sha256(contents).hexdigest()
     
     # 2. Check if job already exists (idempotency)
-    result = await db.execute(select(Job).where(Job.file_hash == file_hash))
+    result = await db.execute(
+        select(Job).options(selectinload(Job.extractions)).where(Job.file_hash == file_hash)
+    )
     existing_job = result.scalar_one_or_none()
     if existing_job:
         return existing_job
@@ -63,7 +66,7 @@ async def upload_exam(
     )
     db.add(job)
     await db.commit()
-    await db.refresh(job)
+    await db.refresh(job, attribute_names=['extractions'])
     
     # 5. Trigger Celery Task
     from app.worker.tasks import process_ocr_task
@@ -77,7 +80,9 @@ async def read_job(
     db: Annotated[AsyncSession, Depends(get_db)],
     current_user: Annotated[User, Depends(deps.get_current_user)]
 ):
-    result = await db.execute(select(Job).where(Job.id == job_id))
+    result = await db.execute(
+        select(Job).options(selectinload(Job.extractions)).where(Job.id == job_id)
+    )
     job = result.scalar_one_or_none()
     if not job:
         raise HTTPException(status_code=404, detail="Job not found")

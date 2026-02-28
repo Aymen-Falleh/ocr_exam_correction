@@ -2,7 +2,7 @@ FROM python:3.11-slim
 
 WORKDIR /app
 
-# Install system dependencies for PaddleOCR and OpenCV
+# Install system dependencies for OpenCV
 RUN apt-get update && apt-get install -y \
     libgl1 \
     libglib2.0-0 \
@@ -10,11 +10,15 @@ RUN apt-get update && apt-get install -y \
     && rm -rf /var/lib/apt/lists/*
 
 COPY requirements.txt .
+
+# Install CPU-only PyTorch first (much smaller than CUDA version)
+RUN pip install --no-cache-dir torch torchvision --index-url https://download.pytorch.org/whl/cpu
+
+# Install remaining requirements (easyocr will use the already-installed torch)
 RUN pip install --no-cache-dir -r requirements.txt
 
-# Download PaddleOCR models early to cache them in the image
-# This avoids downloading them on every container start
-RUN python3 -c "from paddleocr import PaddleOCR; PaddleOCR(use_angle_cls=True, lang='ar')"
+# Pre-download EasyOCR models for Arabic, English, French
+RUN python3 -c "import easyocr; easyocr.Reader(['ar','en'], gpu=False); easyocr.Reader(['fr','en'], gpu=False)"
 
 COPY . .
 

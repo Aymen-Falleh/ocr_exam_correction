@@ -31,7 +31,6 @@ import {
     Languages
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
-import { format } from 'date-fns';
 
 import { useTranslations, useFormatter } from 'next-intl';
 import { DropdownMenuSeparator } from '@/components/ui/dropdown-menu';

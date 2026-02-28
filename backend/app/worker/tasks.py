@@ -34,7 +34,7 @@ async def async_process_ocr(job_id: int, file_path: str):
             if not os.path.exists(file_path):
                 raise Exception(f"File not found: {file_path}")
 
-            async with httpx.AsyncClient(timeout=60.0) as client:
+            async with httpx.AsyncClient(timeout=300.0) as client:
                 with open(file_path, "rb") as f:
                     files = {'file': (job.filename, f, 'application/octet-stream')}
                     data = {'language': job.language}

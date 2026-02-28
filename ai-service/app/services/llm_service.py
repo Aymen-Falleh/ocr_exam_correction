@@ -59,6 +59,14 @@ class LLMService:
             })
             return response
         except Exception as e:
-            # Fallback logic if LLM fails
+            # Fallback logic if LLM fails — return raw OCR as Q/A pairs
             print(f"LLM Error: {str(e)}")
-            return []
+            fallback = []
+            for i, item in enumerate(ocr_results):
+                fallback.append({
+                    "question": f"Q{i+1}",
+                    "answer": item.get("text", ""),
+                    "confidence": item.get("confidence", 0.0),
+                    "bbox": item.get("bbox", [0, 0, 0, 0])
+                })
+            return fallback

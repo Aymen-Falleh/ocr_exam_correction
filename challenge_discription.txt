@@ -1,0 +1,25 @@
+Multilingual Handwritten Exam OCR Solution Using Advanced OCR and LLMs:
+
+
+
+
+This challenge consists of designing and implementing a full Optical Character Recognition (OCR) solution capable of accurately extracting handwritten student answers from scanned exam sheets. 
+
+The system must work primarily with Arabic handwritten text, while also supporting French and English samples. 
+
+The objective : is to build a robust pipeline that combines advanced OCR techniques with Large Language Models (LLMs) to improve text extraction quality, structure recognition, and readability without modifying, predicting, correcting, or rephrasing the student’s original answers. 
+
+The extracted output must strictly preserve the authenticity and integrity of the handwritten content. 
+
+The proposed solution should: 
+
+    Detect and process scanned handwritten exam sheets. -
+    Accurately extract student answers in Arabic (primary focus), French, and English. -
+    Preserve the exact wording, spelling, and formatting of the student’s response.
+    Avoid hallucination, auto-correction, paraphrasing, or content enhancement. 
+    Maintain alignment between extracted answers and their corresponding questions.
+    Handle common handwriting challenges such as variable writing styles, noise, skewed scans, and mixed-language responses. 
+
+Sample exam sheets will be provided for training, validation, and testing purposes.  
+
+The final system should demonstrate high accuracy in multilingual handwritten text extraction while ensuring reliability, transparency, and strict preservation of the original student content.
